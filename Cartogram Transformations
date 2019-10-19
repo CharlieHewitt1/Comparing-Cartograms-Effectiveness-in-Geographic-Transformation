@@ -1,0 +1,42 @@
+library(sf)
+library(cartogram) 
+library(tmap) 
+library(maptools)
+
+# Adding the data, choosing the region (N.Europe), and CRS 
+data(wrld_simpl) 
+neurope <- wrld_simpl[wrld_simpl$SUBREGION == 154, ] 
+neurope <- spTransform(neurope, CRS("+init=epsg:3395"))
+
+# Sf object
+neurope_sf <- st_as_sf(neurope)
+
+# Contiguous cartogram
+neurope_sf_cont <- cartogram_cont(neurope_sf, "POP2005", 15)
+
+# Non-contiguous cartogram 
+neurope_sf_ncont <- cartogram_ncont(neurope_sf, "POP2005")
+
+# Dorling cartogram 
+neurope_sf_dorling <- cartogram_dorling(neurope_sf, "POP2005")
+
+
+# Plotting the cartograms 
+# Contiguous 
+m1 <- tm_shape(neurope_sf_cont) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE, border.alpha = 0) + 
+  tm_layout(frame = FALSE)
+  
+# Non-Contiguous 
+m2 <- tm_shape(neurope_sf_ncont) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE, border.alpha = 0) + 
+  tm_layout(frame = FALSE)
+
+# Dorling 
+m3 <- tm_shape(neurope_sf_dorling) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE, border.alpha = 0) + 
+  tm_layout(frame = FALSE, legend.outside = TRUE)
+
+# Legend 
+ml <- tm_shape(neurope_sf_dorling) + tm_polygons("POP2005", style = "jenks", border.alpha = 0) + 
+  tm_layout(frame = FALSE, legend.only = TRUE, legend.position = c("center", "center"))
+  
+# Plotting the cartograms and legend on two rows
+tmap_arrange(m1, m2, m3, ml, nrow = 2)
